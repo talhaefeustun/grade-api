@@ -84,4 +84,20 @@ public class GetAverageGradeUseCaseMockitoTest {
         // Assert
         assertEquals(83.0, result);
     }
+    @Test
+    void skipsMembersWithoutAGradeForTheCourse() {
+        Team team = Team.builder().name("team")
+                .members(new String[]{"alice", "bob"}).build();
+        Grade grade = Grade.builder().username("alice").course("207").grade(85).build();
+        Grade otherCourse = Grade.builder().username("bob").course("148").grade(100).build();
+        when(gradeDB.getMyTeam()).thenReturn(team);
+        when(gradeDB.getGrade("alice", "207")).thenReturn(grade);
+        when(gradeDB.getGrade("bob", "207"))
+                .thenThrow(new RuntimeException("Grade could not be found"));
+        when(gradeDB.getGrades("alice")).thenReturn(new Grade[]{grade});
+        when(gradeDB.getGrades("bob")).thenReturn(new Grade[]{otherCourse});
+
+        assertEquals(85.0f, getAverageGradeUseCase.getAverageGrade("207"));
+        assertEquals(0.0f, getAverageGradeUseCase.getAverageGrade("999"));
+    }
 }

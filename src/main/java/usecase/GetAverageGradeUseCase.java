@@ -22,12 +22,16 @@ public final class GetAverageGradeUseCase {
     public float getAverageGrade(String course) {
         float sum = 0;
         int count = 0;
-        final Team team = gradeDataBase.getMyTeam(); // Call the API to get the usernames of all team members
+        final Team team = gradeDataBase.getMyTeam();
         for (String username : team.getMembers()) {
-            final Grade grade = gradeDataBase.getGrade(username, course);
-            sum += grade.getGrade();
-            count++;
+            for (Grade grade : gradeDataBase.getGrades(username)) {
+                if (grade.getCourse().equals(course)) {
+                    sum += grade.getGrade();
+                    count++;
+                }
+            }
         }
+
         if (count == 0) {
             return 0;
         }
